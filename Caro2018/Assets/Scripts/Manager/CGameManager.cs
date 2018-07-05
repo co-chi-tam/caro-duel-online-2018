@@ -50,6 +50,7 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 	protected virtual void Start() {
 		if (this.m_IsLocal == false) {
 			this.m_Player = CPlayer.GetInstance();
+			this.m_Player.socket.Off("receiveChessPosition", this.OnReceiveChessPosition);
 			this.m_Player.socket.On("receiveChessPosition", this.OnReceiveChessPosition);
 		}
 		this.InitGame ();
@@ -88,7 +89,13 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 
 	public virtual void OnUpdateGame(int x, int y) {
 		if (this.m_IsLocal == false) {
-			this.m_Player.SendChessPosition(x, y);
+			if (this.m_TurnIndex == (this.m_Player.playerData.turnIndex == 1)) {
+				this.m_Player.SendChessPosition(x, y);
+				var chess =	this.m_MapChesses[x, y];
+				this.CheckTurn(chess);
+			} else {
+				this.m_Player.ShowMessage ("This is not your turn.");
+			}
 		} else {
 			var chess =	this.m_MapChesses[x, y];
 			chess.SetState(this.m_TurnIndex ? CChess.EChessState.RED : CChess.EChessState.BLUE);
@@ -113,11 +120,15 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 	public virtual void OnEndGame() {
 		Debug.Log ("AAAAAA WINNER IS " + (this.m_TurnIndex ? "RED" : "BLUE"));
 		if (this.m_IsLocal == false) {
-			var winnerName = this.m_Player.room.roomPlayes[this.m_TurnIndex ? 1 : 0].name;
-			if (winnerName == this.m_Player.playerData.name) {
-				this.m_Player.ShowMessage ("...YOU WIN...", this.OnResetGame);
+			if (this.m_Player.room.roomPlayes.Length == 2) {
+				var winnerName = this.m_Player.room.roomPlayes[this.m_TurnIndex ? 1 : 0].name;
+				if (winnerName == this.m_Player.playerData.name) {
+					this.m_Player.ShowMessage ("...YOU WIN...", this.OnResetGame);
+				} else {
+					this.m_Player.ShowMessage ("...YOU LOSE...", this.OnResetGame);
+				}
 			} else {
-				this.m_Player.ShowMessage ("...YOU LOSE...", this.OnResetGame);
+				this.m_Player.ShowMessage ("...SERVER ERROR. \n Try again...", this.OnResetGame);
 			}
 		}
 	}

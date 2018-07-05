@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class CPlayCaro7x7Scene : MonoBehaviour {
 
+	[SerializeField]	protected Text m_RoonNameDisplay;
 	[SerializeField]	protected Text[] m_DisplayPlayers;
 	[SerializeField]	protected GameObject[] m_CurrentTurnObjs;
 
@@ -24,10 +25,12 @@ public class CPlayCaro7x7Scene : MonoBehaviour {
 	}
 
 	protected virtual void SetupPlayers() {
-		var maximumPlayer = this.m_Player.room.roomPlayes.Length > 2 ? 2 : this.m_Player.room.roomPlayes.Length;
+		var currentRoom = this.m_Player.room;
+		var maximumPlayer = currentRoom.roomPlayes.Length > 2 ? 2 : currentRoom.roomPlayes.Length;
 		for (int i = 0; i < maximumPlayer; i++) {
-			this.m_DisplayPlayers[i].text = this.m_Player.room.roomPlayes[i].name;
+			this.m_DisplayPlayers[i].text = currentRoom.roomPlayes[i].name;
 		}
+		this.m_RoonNameDisplay.text = currentRoom.roomName;
 	}
 
 }

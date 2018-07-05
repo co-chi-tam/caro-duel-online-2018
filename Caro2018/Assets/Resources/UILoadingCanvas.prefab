@@ -91,6 +91,7 @@ GameObject:
   - component: {fileID: 223742347505925274}
   - component: {fileID: 114316304670693584}
   - component: {fileID: 114979072208096080}
+  - component: {fileID: 114736703399022604}
   m_Layer: 5
   m_Name: UILoadingCanvas
   m_TagString: Untagged
@@ -611,6 +612,20 @@ MonoBehaviour:
         m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
+--- !u!114 &114736703399022604
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1429554642933834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 249e37cf5d42bc84ab89c56f29a01da9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_MessagePanel: {fileID: 1384028057716540}
+  m_MessageText: {fileID: 114683666766230226}
+  m_MessageOKButton: {fileID: 114010324240525304}
 --- !u!114 &114745144109939616
 MonoBehaviour:
   m_ObjectHideFlags: 1

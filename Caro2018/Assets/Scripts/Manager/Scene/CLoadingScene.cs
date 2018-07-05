@@ -13,6 +13,7 @@ public class CLoadingScene : MonoBehaviour {
 
 	protected CPlayer m_Player;
 	protected WaitForSeconds m_DelaySeconds = new WaitForSeconds(3f);
+	protected float m_MaximumTimer = 30f;
 
 	protected virtual void Start() {
 		this.m_Player = CPlayer.GetInstance ();
@@ -27,11 +28,11 @@ public class CLoadingScene : MonoBehaviour {
 	}
 
 	protected IEnumerator HandleSendRequestConnect() {
-		var maximumTimer = 30f;
-		while (maximumTimer > 0f) {
+		this.m_MaximumTimer = 30f;
+		while (this.m_MaximumTimer >= 0f) {
 			yield return this.m_DelaySeconds;
 			this.m_Player.socket.Connect();
-			maximumTimer -= 3f;
+			this.m_MaximumTimer -= 3f;
 		}
 		this.ShowMessage ("Can not connect server. Please try again.", () => {
 			this.SendRequestConnect ();

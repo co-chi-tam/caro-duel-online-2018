@@ -91,15 +91,14 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 		if (this.m_IsLocal == false) {
 			if (this.m_TurnIndex == (this.m_Player.playerData.turnIndex == 1)) {
 				this.m_Player.SendChessPosition(x, y);
-				var chess =	this.m_MapChesses[x, y];
-				this.CheckTurn(chess);
+				this.CheckTurn();
 			} else {
 				this.m_Player.ShowMessage ("This is not your turn.");
 			}
 		} else {
 			var chess =	this.m_MapChesses[x, y];
 			chess.SetState(this.m_TurnIndex ? CChess.EChessState.RED : CChess.EChessState.BLUE);
-			this.CheckTurn(chess);
+			this.CheckTurn();
 			this.ChangeTurn();
 		}
 	}
@@ -112,7 +111,7 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 		var chess =	this.m_MapChesses[x, y];
 		this.m_TurnIndex = turnIndex == 1;
 		chess.SetState(this.m_TurnIndex ? CChess.EChessState.RED : CChess.EChessState.BLUE);
-		this.CheckTurn(chess);
+		this.CheckTurn();
 		this.ChangeTurn();
 		this.m_ChessPlayedCount++;
 	}
@@ -147,7 +146,7 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 		this.m_TurnIndex = !this.m_TurnIndex;
 	}
 
-	public virtual void CheckTurn(CChess value) {
+	public virtual void CheckTurn() {
 		for (int i = 0; i < this.m_ListChesses.Length; i++)
 		{
 			var chess = this.m_ListChesses[i];

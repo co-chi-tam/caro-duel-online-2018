@@ -16,6 +16,7 @@ public class CPlayCaro7x7Scene : MonoBehaviour {
 		this.m_Player = CPlayer.GetInstance();
 		this.m_GameManager = CGameManager.GetInstance();
 		this.SetupPlayers();
+		InvokeRepeating("SetupPlayers", 0f, 5f);
 	}
 
 	protected virtual void LateUpdate() {
@@ -25,6 +26,7 @@ public class CPlayCaro7x7Scene : MonoBehaviour {
 	}
 
 	protected virtual void SetupPlayers() {
+		Debug.Log ("SetupPlayers");
 		var currentRoom = this.m_Player.room;
 		var maximumPlayer = currentRoom.roomPlayes.Length > 2 ? 2 : currentRoom.roomPlayes.Length;
 		for (int i = 0; i < maximumPlayer; i++) {

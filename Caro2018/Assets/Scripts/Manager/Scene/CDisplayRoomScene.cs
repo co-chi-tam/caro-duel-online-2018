@@ -5,20 +5,32 @@ using UnityEngine.UI;
 
 public class CDisplayRoomScene : MonoBehaviour {
 
-	[SerializeField]	protected Text[] m_DisplayRooms;
+	[SerializeField]	protected Transform m_RoomRoot;
+	[SerializeField]	protected CUIRoom m_RoomPrefabs;
+
 	protected CPlayer m_Player;
 
 	protected virtual void Start() {
 		this.m_Player = CPlayer.GetInstance ();
 		this.RefreshRoomsStatus();
+
 	}
 
 	protected virtual void UpdateRoomUI() {
 		var rooms = this.m_Player.rooms;
+		var childCount = this.m_RoomRoot.childCount;
 		for (int i = 0; i < rooms.Length; i++)
 		{
-			var tmpRoom = rooms[i];
-			this.m_DisplayRooms[i].text = tmpRoom.roomDisplay;
+			var roomData = rooms[i];
+			var roomUI = i >= childCount
+							? Instantiate(this.m_RoomPrefabs) 
+							: this.m_RoomRoot.GetChild(i).GetComponent<CUIRoom>();
+			roomUI.transform.SetParent (this.m_RoomRoot.transform);
+			roomUI.transform.localScale = Vector3.one;
+			roomUI.SetRoom (i, roomData.roomName, roomData.roomDisplay, () => {
+				this.JoinRoom (roomUI.roomName);
+			});
+			roomUI.gameObject.SetActive (true);
 		}
 	}
 

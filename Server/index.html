@@ -58,6 +58,12 @@
       socket.on('receiveChessFail', function(data) {
             console.log (JSON.stringify(data));
       });
+      socket.on('beep', function(data) {
+            console.log ("beep");
+      });
+      setInterval(function(){
+            socket.emit("beep");
+      }, 1000);
    </script>
    
    <body>

@@ -1,7 +1,8 @@
 const HOST = process.env.HOST || 'localhost';
 const PORT = process.env.PORT || 3030;
 
-var app = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
@@ -16,6 +17,10 @@ rooms = {};
 
 io.on('connection', function(socket) {
     console.log('A user connected ' + (socket.client.id));
+    // Welcome message
+    socket.emit('welcome', { 
+        msg: 'Welcome to connect game caro duel online.'
+    });
     // INIT PLAYER
     socket.on('setPlayername', function(data) {
         if (data) {
@@ -48,18 +53,21 @@ io.on('connection', function(socket) {
         }
     });
     socket.on('beep', function(data) {
-       console.log('beep..');
+       socket.emit('boop');
     })
     // INIT ROOM
     socket.on('getRoomsStatus', function() {
         var results = [];
-        for (let i = 0; i < 10; i++) {
+        const maxRoom = 10; // MAXIMUM ROOM
+        for (let i = 0; i < maxRoom; i++) {
             const roomName = 'room-' + (i + 1);
+            const playerCount = typeof (rooms [roomName]) !== 'undefined' 
+                                    ? rooms [roomName].length()
+                                    : 0;
             results.push ({
                 roomName: roomName,
-                players: typeof (rooms [roomName]) !== 'undefined' 
-                    ? rooms [roomName].length()
-                    : 0
+                roomDisplay: '[' + roomName + ']: ' + playerCount + '/2',
+                players: playerCount
             });
         }
         socket.emit('updateRoomStatus', {
@@ -73,21 +81,22 @@ io.on('connection', function(socket) {
                 rooms [roomName] = new GameRoom();
             }
             rooms [roomName].roomName = roomName;
-            if (rooms [roomName].contain (socket) == false 
-                && rooms [roomName].length() < 2) {
-                rooms [roomName].join (socket);
-                rooms [roomName].emitAll('newJoinRoom', {
-                    roomInfo: rooms [roomName].getInfo()
-                });
-                socket.room = rooms [roomName];
-                console.log ("A player join room. " + roomName + " Room: " + rooms [roomName].length());
+            if (rooms [roomName].contain (socket) == false) {
+                if (rooms [roomName].length() < 2) {
+                    rooms [roomName].join (socket);
+                    rooms [roomName].emitAll('newJoinRoom', {
+                        roomInfo: rooms [roomName].getInfo()
+                    });
+                    socket.room = rooms [roomName];
+                    console.log ("A player join room. " + roomName + " Room: " + rooms [roomName].length());
+                } else {
+                    socket.emit('joinRoomFailed', {
+                        msg: "Room is full. Please try again late."
+                    });
+                }
             } else {
                 socket.emit('joinRoomFailed', {
-                    msg: rooms [roomName].contain (socket) 
-                        ? "You are already join room."
-                        : rooms [roomName].length() >= 2 
-                            ? "Room is full."
-                            : "Error, please constact with developer."
+                    msg: "You are already join room."
                 });
             }
         }
@@ -160,5 +169,5 @@ io.on('connection', function(socket) {
 });
 
 http.listen(PORT, function() {
-   console.log('listening on ' + HOST ':' + PORT);
-});
+   console.log('listening on ' + HOST + ':' + PORT);
+}); 

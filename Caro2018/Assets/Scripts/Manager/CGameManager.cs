@@ -36,6 +36,7 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 	}
 
 	protected CPlayer m_Player;
+	protected int m_ChessPlayedCount = 0;
 
 	#endregion
 
@@ -74,6 +75,7 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 				this.m_MapChesses[x, y] = cell;
 			}
 		}
+		this.m_ChessPlayedCount = 0;
 	}
 
 	#endregion
@@ -105,6 +107,7 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 		chess.SetState(this.m_TurnIndex ? CChess.EChessState.RED : CChess.EChessState.BLUE);
 		this.CheckTurn(chess);
 		this.ChangeTurn();
+		this.m_ChessPlayedCount++;
 	}
 
 	public virtual void OnEndGame() {
@@ -140,10 +143,10 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 			if (chess.chessState == CChess.EChessState.None)
 				continue;
 			var results = this.CheckChess (chess);
-			if (results != null && results.Count > 0) {
+			if (results != null && results.Count > 0) {	// WIN or LOSE or IS DRAW
 				this.OnEndGame ();
 				break;
-			}
+			} 
 		}
 	}
 

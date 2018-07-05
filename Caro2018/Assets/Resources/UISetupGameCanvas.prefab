@@ -176,7 +176,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 0.5}
+  m_Color: {r: 0.084905684, g: 0.08370419, b: 0.08370419, a: 0.6627451}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -196,7 +196,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Enter text...
+  m_Text: Enter you name...
 --- !u!114 &114060698889952074
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -539,6 +539,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfddd94e535cb36489d060026ac9bb1c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_DisplayName: {fileID: 114248355631092416}
 --- !u!222 &222094262796923772
 CanvasRenderer:
   m_ObjectHideFlags: 1

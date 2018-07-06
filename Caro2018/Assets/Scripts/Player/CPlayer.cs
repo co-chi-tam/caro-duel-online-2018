@@ -85,19 +85,9 @@ public class CPlayer : CMonoSingleton<CPlayer> {
 	}
 
 	protected virtual void Update() {
-		// if (Input.GetKeyDown(KeyCode.A)) {
-		// 	this.SetPlayername("Norman");
-		// }
-		// if (Input.GetKeyDown(KeyCode.B)) {
-		// 	this.JoinOrCreateRoom();
-		// }
-		// if (Input.GetKeyDown(KeyCode.C)) {
-		// 	this.SendMessageRoomChat("HAHAHA");
-		// }
-		// if (Input.GetKeyDown(KeyCode.D)) {
-		// 	this.SendChessPosition(0, 1);
-		// }
-		if (Input.GetKeyDown(KeyCode.Escape)) {
+		if (Input.GetKeyDown(KeyCode.Home) 
+			|| Input.GetKeyDown(KeyCode.Escape)
+			|| Input.GetKeyDown(KeyCode.Menu)) {
 			this.Disconnect();
 			this.SwithSceneTo("LoadingScene");
 		}
@@ -108,25 +98,25 @@ public class CPlayer : CMonoSingleton<CPlayer> {
 		this.Disconnect();
 	}
 
-	protected virtual void OnApplicationFocus(bool focusStatus)
-	{
+	// protected virtual void OnApplicationFocus(bool focusStatus)
+	// {
 // #if UNITY_ANDROID || UNITY_IOS 
 // 		if (focusStatus == false) {
 // 			this.Disconnect();
 // 			this.SwithSceneTo("LoadingScene");
 // 		}
 // #endif
-	}
+	// }
 
-	protected virtual void OnApplicationPause(bool pauseStatus)
-	{
-#if UNITY_ANDROID || UNITY_IOS 
-		if (pauseStatus == true) {
-			this.Disconnect();
-			this.SwithSceneTo("LoadingScene");
-		}
-#endif
-	}
+	// protected virtual void OnApplicationPause(bool pauseStatus)
+	// {
+// #if UNITY_ANDROID || UNITY_IOS 
+// 		if (pauseStatus == true) {
+// 			this.Disconnect();
+// 			this.SwithSceneTo("LoadingScene");
+// 		}
+// #endif
+	// }
 
 	#endregion
 
@@ -149,6 +139,7 @@ public class CPlayer : CMonoSingleton<CPlayer> {
 		while (true) {
 			// wait 3 seconds and continue
 			yield return this.m_DelaySeconds;
+			this.Connect();
 			this.m_Socket.Emit("beep");
 		}
 	}
@@ -213,14 +204,28 @@ public class CPlayer : CMonoSingleton<CPlayer> {
 
 	#region Send
 
+	/// <summary> 
+	/// Emit message.
+	/// </summary>
 	public virtual void Emit(string ev) {
-		this.m_Socket.Emit(ev);
+		if (this.m_Socket != null) {
+			this.m_Socket.Emit(ev);
+		}
 	}
 
+	/// <summary> 
+	/// Emit message.
+	/// </summary>
 	public virtual void Emit(string ev, JSONObject data) {
-		this.m_Socket.Emit(ev, data);	
+		if (this.m_Socket != null) {
+			this.m_Socket.Emit(ev, data);
+		}
 	}
 
+	/// <summary>
+	/// Emit Set player name.
+	/// Necessary emit first.
+	/// </summary>
 	public void SetPlayername(string value = "Norman") {
 		if (this.m_Socket.IsConnected == false) {
 			this.m_Socket.Connect();
@@ -229,13 +234,22 @@ public class CPlayer : CMonoSingleton<CPlayer> {
 		roomData.AddField("playerName", value);
 		this.Emit("setPlayername", roomData);
 		this.DisplayLoading (true);
+		#if UNITY_DEBUG
+		Debug.Log ("SetPlayername");
+		#endif
 	}
 
+	/// <summary>
+	/// Emit Join random room.
+	/// </summary>
 	public void JoinOrCreateRoom() {
 		var random = UnityEngine.Random.Range (1, this.m_Rooms.Length);
 		this.JoinRoom ("room-" + random);
 	}
 
+	/// <summary>
+	/// Emit join a room by name.
+	/// </summary>
 	public void JoinRoom(string roomName) {
 		if (this.m_Socket.IsConnected == false) {
 			this.m_Socket.Connect();
@@ -243,22 +257,32 @@ public class CPlayer : CMonoSingleton<CPlayer> {
 		var roomData = new JSONObject();
 		roomData.AddField("roomName", roomName);
 		this.Emit("joinOrCreateRoom", roomData);
-		Debug.Log ("JoinOrCreateRoom");
 		this.DisplayLoading (true);
+		#if UNITY_DEBUG
+		Debug.Log ("JoinOrCreateRoom");
+		#endif
 	}
 
+	/// <summary>
+	/// Emit to get room info.
+	/// </summary>
 	public void GetRoomsStatus(Action callback = null) {
 		if (this.m_Socket.IsConnected == false) {
 			this.m_Socket.Connect();
 		}
 		this.Emit("getRoomsStatus");
-		Debug.Log ("GetRoomsStatus");
 		this.DisplayLoading (true);
 		this.m_Rooms = new CRoom[0];
 		this.RemoveListener("updateRoomsComplete", callback);
 		this.AddListener("updateRoomsComplete", callback);
+		#if UNITY_DEBUG
+		Debug.Log ("GetRoomsStatus");
+		#endif
 	}
 
+	/// <summary>
+	/// Send room message chat.
+	/// </summary>
 	public void SendMessageRoomChat(string msg = "Hey, i'm Norman.") {
 		if (this.m_Socket.IsConnected == false) {
 			this.m_Socket.Connect();
@@ -266,17 +290,27 @@ public class CPlayer : CMonoSingleton<CPlayer> {
 		var roomData = new JSONObject();
 		roomData.AddField("message", msg);
 		this.Emit("sendRoomChat", roomData);
+		#if UNITY_DEBUG
 		Debug.Log ("SendMessageChat");
+		#endif
 	}
 
+	/// <summary>
+	/// Emit leave room.
+	/// </summary>
 	public void LeaveRoom() {
 		if (this.m_Socket.IsConnected == false) {
 			this.m_Socket.Connect();
 		}
 		this.Emit("leaveRoom");
+		#if UNITY_DEBUG
 		Debug.Log ("leaveRoom");
+		#endif
 	}
 
+	/// <summary>
+	/// Send chess position
+	/// </summary>
 	public void SendChessPosition(int x, int y) {
 		if (this.m_Socket.IsConnected == false) {
 			this.m_Socket.Connect();
@@ -286,44 +320,81 @@ public class CPlayer : CMonoSingleton<CPlayer> {
 		roomData.AddField("posY", y);
 		roomData.AddField("turnIndex", this.m_Data.turnIndex);
 		this.Emit("sendChessPosition", roomData);
+		#if UNITY_DEBUG
 		Debug.Log ("sendChessPosition");
+		#endif
 	}
 
 	#endregion
 
 	#region Receive
 
+	/// <summary>
+	/// Receive open connect message.
+	/// </summary>
 	public void ReceiveOpenMsg(SocketIOEvent e)
 	{
+		#if UNITY_DEBUG
 		Debug.Log("[SocketIO] Open received: " + e.name + " " + e.data);
+		#endif
 	}
 
+	/// <summary>
+	/// Receive beep and boop message.
+	/// Keep connect between client and server.
+	/// </summary>
 	public void ReceiveBoop(SocketIOEvent e) {
+		#if UNITY_DEBUG
 		Debug.Log("[SocketIO] Boop received: " + e.name + " " + e.data);
+		#endif
 	}
 	
+	/// <summary>
+	/// Receive error.
+	/// </summary>
 	public void ReceiveErrorMsg(SocketIOEvent e)
 	{
+		#if UNITY_DEBUG
 		Debug.Log("[SocketIO] Error received: " + e.name + " " + e.data);
+		#endif
 		this.ShowMessage (e.data.GetField("msg").ToString());
 		this.DisplayLoading (false);
 	}
 	
+	/// <summary>
+	/// Receive close connect message.
+	/// </summary>
 	public void ReceiveCloseMsg(SocketIOEvent e)
 	{	
+		#if UNITY_DEBUG
 		Debug.Log("[SocketIO] Close received: " + e.name + " " + e.data);
+		#endif
 	}
 
+	/// <summary>
+	/// Receive player name message.
+	/// Emit from SetPlayerName.
+	/// </summary>
 	public void ReceivePlayerName (SocketIOEvent e) {
+		#if UNITY_DEBUG
 		Debug.Log ("[SOCKET IO] Player name receive " + e.name + e.data);
+		#endif
 		this.m_Data.id = e.data.GetField("id").ToString().Replace ("\"","");
 		this.m_Data.name = e.data.GetField("name").ToString().Replace("\"", "");
 		this.DisplayLoading (false);
 		this.m_SwitchScene.LoadScene ("DisplayRoomsScene");
+		CSetupGameScene.ALREADY_SETUP = true;
 	}
 
+	/// <summary>
+	/// Receive Join a room complete message.
+	/// Change PlayCaro7x7Scene
+	/// Emit from JoinOrCreateRoom or JoinRoom.
+	/// </summary>
 	public void JoinRoomCompleted(SocketIOEvent e) {
+		#if UNITY_DEBUG
 		Debug.Log("[SocketIO] Join room received: " + e.name + " " + e.data);
+		#endif
 		var room = e.data.GetField("roomInfo");
 		this.m_Room = new CRoom();
 		this.m_Room.roomName = room.GetField("roomName").ToString().Replace ("\"","");
@@ -339,39 +410,85 @@ public class CPlayer : CMonoSingleton<CPlayer> {
 		this.m_SwitchScene.LoadScene ("PlayCaro7x7Scene");
 	}
 
+	/// <summary>
+	/// Receive Join a room fail message.
+	/// Emit from JoinOrCreateRoom or JoinRoom.
+	/// </summary>
 	public void JoinRoomFailed(SocketIOEvent e) {
+		#if UNITY_DEBUG
 		Debug.Log("[SocketIO] Join room failed received: " + e.name + " " + e.data);
-		this.m_Room = new CRoom();
+		#endif
 		this.DisplayLoading (false);
 		this.ShowMessage (e.data.GetField("msg").ToString());
 	}
 
+	/// <summary>
+	/// Receive turn index for game.
+	/// After enough player in room.
+	/// </summary>
 	public void ReceiveTurnIndex(SocketIOEvent e) {
+		#if UNITY_DEBUG
 		Debug.Log("[SocketIO] Join room failed received: " + e.name + " " + e.data);
+		#endif
 		this.m_Data.turnIndex = int.Parse (e.data.GetField("turnIndex").ToString());
 		this.DisplayLoading (false);
 	}
 
+	/// <summary>
+	/// Receive chess position complete.
+	/// And change turn play.
+	/// </summary>
 	public void ReceiveChessPosition(SocketIOEvent e) {
+		#if UNITY_DEBUG
 		Debug.Log("[SocketIO] Received chess position: " + e.name + " " + e.data);
+		#endif
 		this.DisplayLoading (false);
 	}
 
+	/// <summary>
+	/// Receive chess position fail.
+	/// </summary>
 	public void ReceiveChessFail(SocketIOEvent e) {
+		#if UNITY_DEBUG
 		Debug.Log("[SocketIO] Received chess fail: " + e.name + " " + e.data);
+		#endif
 		this.DisplayLoading (false);
 		this.ShowMessage (e.data.GetField("msg").ToString());
 	}
 
+	/// <summary>
+	/// Receive leave message.
+	/// Emit from LeaveRoom.
+	/// </summary>
 	public void ReceiveClearRoom(SocketIOEvent e) {
+		#if UNITY_DEBUG
 		Debug.Log("[SocketIO] Received clear room: " + e.name + " " + e.data);
+		#endif
 		this.DisplayLoading (false);
 		this.m_SwitchScene.LoadScene ("DisplayRoomsScene");
 		this.ShowMessage (e.data.GetField("msg").ToString());
 	}
 
+	/// <summary>
+	/// Receive leave message.
+	/// Emit from LeaveRoom.
+	/// </summary>
+	public void LeaveRoomCompleted(SocketIOEvent e) {
+		#if UNITY_DEBUG
+		Debug.Log("[SocketIO] Leave received: " + e.name + " " + e.data);
+		#endif
+		this.DisplayLoading (false);
+		this.m_SwitchScene.LoadScene ("DisplayRoomsScene");
+	}
+
+	/// <summary>
+	/// Receive Update Room Status message.
+	/// Emit from GetRoomStatus.
+	/// </summary>
 	public void UpdateRoomStatus(SocketIOEvent e) {
+		#if UNITY_DEBUG
 		Debug.Log("[SocketIO] Received update room status: " + e.name + " " + e.data);
+		#endif
 		this.DisplayLoading (false);
 		var receiveRooms = e.data.GetField("rooms").list;
 		this.m_Rooms = new CRoom[receiveRooms.Count];
@@ -388,14 +505,14 @@ public class CPlayer : CMonoSingleton<CPlayer> {
 		this.CallbackEvent("updateRoomsComplete");
 	}
 
-	public void LeaveRoomCompleted(SocketIOEvent e) {
-		Debug.Log("[SocketIO] Leave received: " + e.name + " " + e.data);
-		this.DisplayLoading (false);
-		this.m_SwitchScene.LoadScene ("DisplayRoomsScene");
-	}
-
+	/// <summary>
+	/// Receive Chat message.
+	/// Emit from SendMessageRoomChat.
+	/// </summary>
 	public void ReceiveRoomChat (SocketIOEvent e) {
+		#if UNITY_DEBUG
 		Debug.Log ("[SOCKET IO] Room chat receive " + e.name + e.data);
+		#endif
 	}
 
 	#endregion

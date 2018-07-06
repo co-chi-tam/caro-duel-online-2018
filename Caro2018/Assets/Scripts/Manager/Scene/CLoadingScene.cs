@@ -7,10 +7,6 @@ using SocketIO;
 
 public class CLoadingScene : MonoBehaviour {
 
-	[SerializeField]	protected GameObject m_MessagePanel;
-	[SerializeField]	protected Text m_MessageText;
-	[SerializeField]	protected Button m_MessageOKButton;
-
 	protected CPlayer m_Player;
 	protected WaitForSeconds m_DelaySeconds = new WaitForSeconds(3f);
 	protected float m_MaximumTimer = 30f;
@@ -34,26 +30,17 @@ public class CLoadingScene : MonoBehaviour {
 			this.m_Player.socket.Connect();
 			this.m_MaximumTimer -= 3f;
 		}
-		this.ShowMessage ("Can not connect server. Please try again.", () => {
+		this.m_Player.ShowMessage ("Can not connect server. Please try again.", () => {
 			this.SendRequestConnect ();
 		});
 	}
 
 	protected void ReceveiWelcomeMsg(SocketIOEvent e) {
+		#if UNITY_DEBUG
 		Debug.Log("[SocketIO] Welcome received: " + e.name + " " + e.data);
+		#endif
 		this.m_Player.SwithSceneTo ("SetupGameScene");
 		StopCoroutine(this.HandleSendRequestConnect());
-	}
-
-	public virtual void ShowMessage(string text, UnityAction callback = null) {
-		if (this.m_MessagePanel != null && this.m_MessageText != null) {
-			this.m_MessagePanel.SetActive (true);
-			this.m_MessageText.text = text;
-			if (callback != null) {
-				this.m_MessageOKButton.onClick.RemoveListener(callback);
-				this.m_MessageOKButton.onClick.AddListener (callback);
-			}
-		}
 	}
 	
 }

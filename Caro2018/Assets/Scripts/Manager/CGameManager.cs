@@ -91,10 +91,10 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 		if (this.m_IsLocal == false) {
 			if (this.m_TurnIndex == (this.m_Player.playerData.turnIndex == 1)) {
 				this.m_Player.SendChessPosition(x, y);
-				this.CheckTurn();
 			} else {
 				this.m_Player.ShowMessage ("This is not your turn.");
 			}
+			this.CheckTurn();
 		} else {
 			var chess =	this.m_MapChesses[x, y];
 			chess.SetState(this.m_TurnIndex ? CChess.EChessState.RED : CChess.EChessState.BLUE);
@@ -117,17 +117,15 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 	}
 
 	public virtual void OnEndGame() {
+		#if UNITY_DEBUG
 		Debug.Log ("AAAAAA WINNER IS " + (this.m_TurnIndex ? "RED" : "BLUE"));
+		#endif
 		if (this.m_IsLocal == false) {
-			if (this.m_Player.room.roomPlayes.Length == 2) {
-				var winnerName = this.m_Player.room.roomPlayes[this.m_TurnIndex ? 1 : 0].name;
-				if (winnerName == this.m_Player.playerData.name) {
-					this.m_Player.ShowMessage ("...YOU WIN...", this.OnResetGame);
-				} else {
-					this.m_Player.ShowMessage ("...YOU LOSE...", this.OnResetGame);
-				}
+			var winnerName = this.m_Player.room.roomPlayes[this.m_TurnIndex ? 1 : 0].name;
+			if (winnerName == this.m_Player.playerData.name) {
+				this.m_Player.ShowMessage ("...YOU WIN...", this.OnResetGame);
 			} else {
-				this.m_Player.ShowMessage ("...SERVER ERROR. \n Try again...", this.OnResetGame);
+				this.m_Player.ShowMessage ("...YOU LOSE...", this.OnResetGame);
 			}
 		}
 	}
@@ -154,6 +152,11 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 				continue;
 			var results = this.CheckChess (chess);
 			if (results != null && results.Count > 0) {	// WIN or LOSE or IS DRAW
+				for (int c = 0; c < results.Count; c++)
+				{
+					var popChess = results[c];
+					popChess.PlayAnimation();
+				}
 				this.OnEndGame ();
 				break;
 			} 

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Button))]
+[RequireComponent(typeof(Animator))]
 public class CChess : MonoBehaviour {
 
 	public enum EChessState: byte {
@@ -31,10 +32,12 @@ public class CChess : MonoBehaviour {
 
 	protected CGameManager m_GameManager;
 	protected Button m_Button;
+	protected Animator m_Animator;
 
 	protected virtual void Awake()
 	{
 		this.m_Button = this.GetComponent<Button> ();
+		this.m_Animator = this.GetComponent<Animator> ();
 	}
 
 	protected virtual void Start()
@@ -57,6 +60,12 @@ public class CChess : MonoBehaviour {
 		this.m_GameManager.OnUpdateGame (this.posX, this.posY);
 	}
 
+	public virtual void PlayAnimation() {
+		if (this.m_Animator != null) {
+			this.m_Animator.SetTrigger("Pop");
+		}
+	}
+
 	public virtual void SetState(EChessState value) {
 		// CHANGE STATE
 		this.m_ChessState = value;
@@ -67,6 +76,8 @@ public class CChess : MonoBehaviour {
 			this.m_BlueObject.SetActive (this.m_ChessState == EChessState.BLUE);
 		// END UPDATE STATE
 		this.m_Button.interactable = false;
+		// PLAY ANIMATION
+		this.PlayAnimation();
 	}
 
 }

@@ -26,7 +26,9 @@ public class CPlayCaro7x7Scene : MonoBehaviour {
 	}
 
 	protected virtual void SetupPlayers() {
+		#if UNITY_DEBUG
 		Debug.Log ("SetupPlayers");
+		#endif
 		var currentRoom = this.m_Player.room;
 		var maximumPlayer = currentRoom.roomPlayes.Length > 2 ? 2 : currentRoom.roomPlayes.Length;
 		for (int i = 0; i < maximumPlayer; i++) {

@@ -14,6 +14,7 @@ public class CLoadingScene : MonoBehaviour {
 	protected virtual void Start() {
 		this.m_Player = CPlayer.GetInstance ();
 		this.m_Player.socket.Connect();
+		this.m_Player.DisplayLoading (true);
 		this.m_Player.socket.Off("welcome", this.ReceveiWelcomeMsg);
 		this.m_Player.socket.On("welcome", this.ReceveiWelcomeMsg);
 		this.SendRequestConnect ();
@@ -40,6 +41,7 @@ public class CLoadingScene : MonoBehaviour {
 		Debug.Log("[SocketIO] Welcome received: " + e.name + " " + e.data);
 		#endif
 		this.m_Player.SwithSceneTo ("SetupGameScene");
+		this.m_Player.DisplayLoading (false);
 		StopCoroutine(this.HandleSendRequestConnect());
 	}
 	

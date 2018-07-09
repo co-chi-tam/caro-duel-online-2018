@@ -1,19 +1,26 @@
 
 function GameRoom() {
+    // Current room name.
     this.roomName = '';
+    // All players 
     this.players = [];
+    // Turn index X or O
     this.turns = [0, 1];    // 'BLUE', 'RED'
     // LOGIC GAME
+    // Remain all chess actived
     this.chessLists = [];
 
+    // Get current turn.
     this.currentTurn = function() {
         return this.chessLists.length % 2; // RED or BLUE
     }
 
+    // Clear list chess actived
     this.clearChess = function() {
         this.chessLists = [];
     }
 
+    // Join room and set turn index for player
     this.join = function (player) {
         if (this.players.indexOf (player) == -1) {
             var self = this;
@@ -28,13 +35,10 @@ function GameRoom() {
                     turnIndex: turn
                 });
             }
-            // LEAVE ROOM
-            player.on('disconnect', function() {
-                self.clearRoom();
-            });
         }
     };
 
+    // Clear room
     this.clearRoom = function() {
         for (let i = 0; i < this.players.length; i++) {
             const ply = this.players[i];
@@ -46,6 +50,7 @@ function GameRoom() {
         this.clearChess();
     };
     
+    // Leave room 
     this.leave = function(player) {
         if (this.players.indexOf (player) > -1) {
             this.players.splice (this.players.indexOf (player), 1);
@@ -53,6 +58,7 @@ function GameRoom() {
         }
     };
     
+    // Send all mesg for players in room.
     this.emitAll  = function (name, obj) {
         for (let i = 0; i < this.players.length; i++) {
             const player = this.players[i];
@@ -60,6 +66,7 @@ function GameRoom() {
         }
     };
 
+    // Get rom info.
     this.getInfo = function() {
         var playerInfoes = [];
         for (let i = 0; i < this.players.length; i++) {
@@ -72,13 +79,15 @@ function GameRoom() {
         };
     }
 
+    // If client contain in room.
     this.contain = function (player) {
         return this.players.indexOf (player) > -1;
     };
     
+    // Get amount of players in room.
     this.length  = function () {
         return this.players.length;
     };
 };
-
+// INIT
 module.exports = GameRoom;

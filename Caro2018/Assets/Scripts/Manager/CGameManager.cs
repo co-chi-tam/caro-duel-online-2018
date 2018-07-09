@@ -9,12 +9,6 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 
 	#region Fields
 
-	[SerializeField]	protected bool m_IsLocal;
-	public bool isLocal { 
-		get { return this.m_IsLocal; }
-		set { this.m_IsLocal = value; }
-	}
-
 	// TURN INDEX.
 	// TRUE is RED. FALSE is BLUE.
 	[SerializeField]	protected bool m_TurnIndex = false;
@@ -38,6 +32,8 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 	protected CPlayer m_Player;
 	protected int m_ChessPlayedCount = 0;
 
+	protected bool m_IsGameEnd = false;
+
 	#endregion
 
 	#region MonoBehaviour Implementation
@@ -48,11 +44,9 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 	}
 
 	protected virtual void Start() {
-		if (this.m_IsLocal == false) {
-			this.m_Player = CPlayer.GetInstance();
-			this.m_Player.socket.Off("receiveChessPosition", this.OnReceiveChessPosition);
-			this.m_Player.socket.On("receiveChessPosition", this.OnReceiveChessPosition);
-		}
+		this.m_Player = CPlayer.GetInstance();
+		this.m_Player.socket.Off("receiveChessPosition", this.OnReceiveChessPosition);
+		this.m_Player.socket.On("receiveChessPosition", this.OnReceiveChessPosition);
 		this.InitGame ();
 		this.OnStartGame ();
 	}
@@ -63,7 +57,6 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 
 	public virtual void InitGame() {
 		this.m_TurnIndex = false;
-		this.m_IsLocal = false;
 		this.m_MapChesses = new CChess[this.m_MapColumn, this.m_MapColumn];
 		for (int y = 0; y < this.m_MapColumn; y++)
 		{
@@ -77,6 +70,7 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 			}
 		}
 		this.m_ChessPlayedCount = 0;
+		this.m_IsGameEnd = false;
 	}
 
 	#endregion
@@ -88,18 +82,15 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 	}
 
 	public virtual void OnUpdateGame(int x, int y) {
-		if (this.m_IsLocal == false) {
+		if (this.m_IsGameEnd) {
+			this.OnEndGame();
+		} else {
 			if (this.m_TurnIndex == (this.m_Player.playerData.turnIndex == 1)) {
 				this.m_Player.SendChessPosition(x, y);
 			} else {
 				this.m_Player.ShowMessage ("This is not your turn.");
 			}
 			this.CheckTurn();
-		} else {
-			var chess =	this.m_MapChesses[x, y];
-			chess.SetState(this.m_TurnIndex ? CChess.EChessState.RED : CChess.EChessState.BLUE);
-			this.CheckTurn();
-			this.ChangeTurn();
 		}
 	}
 
@@ -120,20 +111,17 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 		#if UNITY_DEBUG
 		Debug.Log ("AAAAAA WINNER IS " + (this.m_TurnIndex ? "RED" : "BLUE"));
 		#endif
-		if (this.m_IsLocal == false) {
-			var winnerName = this.m_Player.room.roomPlayes[this.m_TurnIndex ? 1 : 0].name;
-			if (winnerName == this.m_Player.playerData.name) {
-				this.m_Player.ShowMessage ("...YOU WIN...", this.OnResetGame);
-			} else {
-				this.m_Player.ShowMessage ("...YOU LOSE...", this.OnResetGame);
-			}
+		var winnerName = this.m_Player.room.roomPlayes[this.m_TurnIndex ? 1 : 0].name;
+		if (winnerName == this.m_Player.playerData.name) {
+			this.m_Player.ShowMessage ("...YOU WIN...", this.OnResetGame);
+		} else {
+			this.m_Player.ShowMessage ("...YOU LOSE...", this.OnResetGame);
 		}
+		this.m_IsGameEnd = true;
 	}
 
 	public virtual void OnResetGame() {
-		if (this.m_IsLocal == false) {
-			this.m_Player.LeaveRoom();
-		} 
+		this.m_Player.LeaveRoom();
 	}
 
 	#endregion

@@ -25,12 +25,15 @@ public class CDisplayRoomScene : MonoBehaviour {
 			var roomUI = i >= childCount
 							? Instantiate(this.m_RoomPrefabs) 
 							: this.m_RoomRoot.GetChild(i).GetComponent<CUIRoom>();
+			var roomName = roomData.roomName;
+			var roomDisplay = roomData.roomDisplay;
 			roomUI.transform.SetParent (this.m_RoomRoot.transform);
 			roomUI.transform.localScale = Vector3.one;
-			roomUI.SetRoom (i, roomData.roomName, roomData.roomDisplay, () => {
-				this.JoinRoom (roomUI.roomName);
+			roomUI.SetRoom (i, roomName, roomDisplay, () => {
+				this.JoinRoom (roomName);
 			});
 			roomUI.gameObject.SetActive (true);
+			roomUI.name = roomDisplay;
 		}
 	}
 

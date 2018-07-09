@@ -19,7 +19,7 @@ public class CUIRoom : MonoBehaviour {
 		this.m_RoomName = name;
 		this.m_RoomDisplay.text = display;
 		if (callback != null) {
-			this.m_RoomButton.onClick.RemoveListener(callback);	
+			this.m_RoomButton.onClick.RemoveListener (callback);	
 			this.m_RoomButton.onClick.AddListener (callback);
 		}
 		this.m_RoomBackground.color = this.m_BackgroundColors[i % this.m_BackgroundColors.Length];

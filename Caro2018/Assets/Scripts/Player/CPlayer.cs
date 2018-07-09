@@ -74,12 +74,11 @@ public class CPlayer : CMonoSingleton<CPlayer> {
 		socket.On("updateRoomStatus", this.UpdateRoomStatus);
 		socket.On("clearRoom", this.ReceiveClearRoom);
 		socket.On("msgChatRoom", this.ReceiveRoomChat);
+		socket.On("msgWorldChat", this.ReceiveWorldChat);
 		socket.On("playerNameSet", this.ReceivePlayerName);
 		socket.On("turnIndexSet", this.ReceiveTurnIndex);
 		socket.On("receiveChessPosition", this.ReceiveChessPosition);
 		socket.On("receiveChessFail", this.ReceiveChessFail);
-		// UI
-		this.CancelUI ();
 		// Test
 		StartCoroutine("BeepBoop");
 	}
@@ -291,7 +290,22 @@ public class CPlayer : CMonoSingleton<CPlayer> {
 		roomData.AddField("message", msg);
 		this.Emit("sendRoomChat", roomData);
 		#if UNITY_DEBUG
-		Debug.Log ("SendMessageChat");
+		Debug.Log ("SendMessageRoomChat");
+		#endif
+	}
+
+	/// <summary>
+	/// Send World message chat.
+	/// </summary>
+	public void SendMessageWorldChat(string msg = "Hey, i'm Norman.") {
+		if (this.m_Socket.IsConnected == false) {
+			this.m_Socket.Connect();
+		}
+		var roomData = new JSONObject();
+		roomData.AddField("message", msg);
+		this.Emit("sendWorldChat", roomData);
+		#if UNITY_DEBUG
+		Debug.Log ("SendMessageWorldChat");
 		#endif
 	}
 
@@ -512,6 +526,16 @@ public class CPlayer : CMonoSingleton<CPlayer> {
 	public void ReceiveRoomChat (SocketIOEvent e) {
 		#if UNITY_DEBUG
 		Debug.Log ("[SOCKET IO] Room chat receive " + e.name + e.data);
+		#endif
+	}
+
+	/// <summary>
+	/// Receive World Chat message.
+	/// Emit from SendMessageWorldChat.
+	/// </summary>
+	public void ReceiveWorldChat (SocketIOEvent e) {
+		#if UNITY_DEBUG
+		Debug.Log ("[SOCKET IO] World chat receive " + e.name + e.data);
 		#endif
 	}
 

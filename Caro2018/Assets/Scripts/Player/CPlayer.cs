@@ -243,7 +243,7 @@ public class CPlayer : CMonoSingleton<CPlayer> {
 	/// </summary>
 	public void JoinOrCreateRoom() {
 		var random = UnityEngine.Random.Range (1, this.m_Rooms.Length);
-		this.JoinRoom ("room-" + random);
+		this.JoinRoom (this.m_Rooms [random].roomName);
 	}
 
 	/// <summary>

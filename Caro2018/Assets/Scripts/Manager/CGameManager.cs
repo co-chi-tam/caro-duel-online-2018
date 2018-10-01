@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using SimpleSingleton;
 using SocketIO;
 
@@ -28,6 +29,8 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 	public CChess[,] mapChesses {
 		get { return this.m_MapChesses; }
 	}
+
+	public UnityEvent OnReset;
 
 	protected CPlayer m_Player;
 	protected int m_ChessPlayedCount = 0;
@@ -121,6 +124,12 @@ public class CGameManager : CMonoSingleton<CGameManager> {
 	}
 
 	public virtual void OnResetGame() {
+		// CALL EVENTS
+		if (this.OnReset != null)
+		{
+			this.OnReset.Invoke();
+		}
+		// LEAVE ROOM
 		this.m_Player.LeaveRoom();
 	}
 

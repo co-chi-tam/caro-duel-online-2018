@@ -18,6 +18,11 @@ public class CLoadingScene : MonoBehaviour {
 		this.m_Player.socket.Off("welcome", this.ReceveiWelcomeMsg);
 		this.m_Player.socket.On("welcome", this.ReceveiWelcomeMsg);
 		this.SendRequestConnect ();
+		// AD
+		CAdmobManager.Init();
+		CAdmobManager.InitBanner();
+		CAdmobManager.LoadBanner();
+		CAdmobManager.ShowHideBanner(true);
 	}
 
 	protected virtual void SendRequestConnect() {

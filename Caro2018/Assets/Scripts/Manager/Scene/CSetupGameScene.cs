@@ -22,6 +22,8 @@ public class CSetupGameScene : MonoBehaviour {
 		if (ALREADY_SETUP && string.IsNullOrEmpty (savedPlayerName) == false) {
 			this.SubmitDisplayName (savedPlayerName); 
 		}
+		// AD
+		CAdmobManager.ShowHideBanner(true);
 	}
 
 	public virtual void SubmitDisplayName(InputField displayNameInput) {

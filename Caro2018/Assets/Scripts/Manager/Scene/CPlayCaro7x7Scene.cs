@@ -19,6 +19,8 @@ public class CPlayCaro7x7Scene : MonoBehaviour {
 		this.m_IsStartGame = false;
 		this.SetupPlayers();
 		InvokeRepeating("SetupPlayers", 0f, 1f);
+		// AD
+		CAdmobManager.ShowHideBanner(false);
 	}
 
 	protected virtual void SetupPlayers() {

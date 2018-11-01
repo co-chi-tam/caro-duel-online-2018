@@ -13,7 +13,8 @@ public class CDisplayRoomScene : MonoBehaviour {
 	protected virtual void Start() {
 		this.m_Player = CPlayer.GetInstance ();
 		this.RefreshRoomsStatus();
-
+		// AD
+		CAdmobManager.ShowHideBanner(true);
 	}
 
 	protected virtual void UpdateRoomUI() {

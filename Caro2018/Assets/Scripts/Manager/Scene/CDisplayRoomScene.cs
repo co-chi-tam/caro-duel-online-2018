@@ -46,6 +46,10 @@ public class CDisplayRoomScene : MonoBehaviour {
 		this.m_Player.JoinRoom(name);
 	}
 
+	public virtual void JoinExistedRoom() {
+		this.m_Player.JoinExistedRoom();
+	}
+
 	public virtual void SubmitJoinOrCreateRoom() {;
 		this.m_Player.JoinOrCreateRoom();
 	}

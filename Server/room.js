@@ -9,7 +9,7 @@ function GameRoom() {
     // LOGIC GAME
     // Remain all chess actived
     this.chessLists = [];
-
+    
     // Get current turn.
     this.currentTurn = function() {
         return this.chessLists.length % 2; // RED or BLUE

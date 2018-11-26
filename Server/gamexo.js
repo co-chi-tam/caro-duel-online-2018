@@ -3,10 +3,43 @@ var GameRoom = require('./room'); // ROOM LOGIC
 
 users = []; // Array User names
 rooms = {}; // Rooms
+column = 7; 
+row = 8;
+
 const MAXIMUM_ROOMS = 10; // Maximum rooms
+const MAXIMUM_PLAYERS = 2; // MAXIMUM PLAYERS
 
 var GameXO = function (http) {
     var io = require('socket.io')(http); // Require socket.io
+    
+    joinRoom = function(socket, roomName)
+    {
+        if(roomName && socket.player) {
+            if (typeof(rooms [roomName]) === 'undefined') {
+                rooms [roomName] = new GameRoom();
+            }
+            rooms [roomName].roomName = roomName;
+            if (rooms [roomName].contain (socket) == false) {
+                if (rooms [roomName].length() < 2) {
+                    rooms [roomName].join (socket);
+                    socket.room = rooms [roomName];
+                    socket.player.chessLists = [];
+                    rooms [roomName].emitAll('newJoinRoom', {
+                        roomInfo: rooms [roomName].getInfo()
+                    });    
+                    console.log ("A player join room. " + roomName + " Room: " + rooms [roomName].length());
+                } else {
+                    socket.emit('joinRoomFailed', {
+                        msg: "Room is full. Please try again late."
+                    });
+                }
+            } else {
+                socket.emit('joinRoomFailed', {
+                    msg: "You are already join room."
+                });
+            }
+        }
+    }
 
     // On client connect.
     io.on('connection', function(socket) {
@@ -72,30 +105,19 @@ var GameXO = function (http) {
         });
         // Join or create room by name. 
         socket.on('joinOrCreateRoom', function(playerJoin) {
-            if(playerJoin && socket.player) {
-                var roomName = playerJoin.roomName;
-                if (typeof(rooms [roomName]) === 'undefined') {
-                    rooms [roomName] = new GameRoom();
-                }
-                rooms [roomName].roomName = roomName;
-                if (rooms [roomName].contain (socket) == false) {
-                    if (rooms [roomName].length() < 2) {
-                        rooms [roomName].join (socket);
-                        rooms [roomName].emitAll('newJoinRoom', {
-                            roomInfo: rooms [roomName].getInfo()
-                        });
-                        socket.room = rooms [roomName];
-                        socket.player.chessLists = [];    
-                        console.log ("A player join room. " + roomName + " Room: " + rooms [roomName].length());
-                    } else {
-                        socket.emit('joinRoomFailed', {
-                            msg: "Room is full. Please try again late."
-                        });
-                    }
-                } else {
-                    socket.emit('joinRoomFailed', {
-                        msg: "You are already join room."
-                    });
+            joinRoom (socket, playerJoin.roomName);
+        });
+        // Join or create room by name. 
+        socket.on('joinExistedRoom', function() {
+            for (let i = 0; i < MAXIMUM_ROOMS; i++) {
+                const roomName = 'room-' + (i + 1);
+                const playerCount = typeof (rooms [roomName]) !== 'undefined' 
+                                        ? rooms [roomName].length()
+                                        : 0;
+                if (playerCount >= 0 && playerCount < MAXIMUM_PLAYERS)
+                {
+                    joinRoom (socket, roomName);
+                    return;
                 }
             }
         });
@@ -107,7 +129,7 @@ var GameXO = function (http) {
                         x: msg.posX,    // parseInt
                         y: msg.posY     // parseInt
                     }
-                    var gameCurrentTurn = socket.room.chessLists.length % 2;
+                    var gameCurrentTurn = socket.room.chessLists.length % MAXIMUM_PLAYERS;
                     var sendChecking = socket.game.turnIndex == msg.turnIndex 
                                     && socket.game.turnIndex == gameCurrentTurn;
                     // console.log (socket.game.turnIndex +" / "+ msg.turnIndex + " / " + gameCurrentTurn);
@@ -145,7 +167,7 @@ var GameXO = function (http) {
                         x: msg.posX,    // parseInt
                         y: msg.posY     // parseInt
                     }
-                    var gameCurrentTurn = socket.room.chessLists.length % 2;
+                    var gameCurrentTurn = socket.room.chessLists.length % MAXIMUM_PLAYERS;
                     var sendChecking = socket.game.turnIndex == msg.turnIndex 
                                     && socket.game.turnIndex == gameCurrentTurn;
                     if (sendChecking) {
@@ -191,7 +213,7 @@ var GameXO = function (http) {
             if(socket.room) {
                 var roomName = socket.room.roomName;
                 socket.room.clearRoom();
-                socket.room = null;
+                delete socket.room;
                 delete rooms [roomName];
             }
         });
@@ -210,11 +232,24 @@ var GameXO = function (http) {
             }
             // LEAVE ROOM
             if (socket.room) {
+                var roomName = socket.room.roomName;
                 socket.room.clearRoom();
-                socket.room = null;
+                delete socket.room;
+                delete rooms [roomName];
             }
         });
     });
+    // SHUFFLE ARRAY
+    this.shuffle = function(a) {
+        var j, x, i;
+        for (i = a.length - 1; i > 0; i--) {
+            j = Math.floor(Math.random() * (i + 1));
+            x = a[i];
+            a[i] = a[j];
+            a[j] = x;
+        }
+        return a;
+    }
 };
 // INIT
 module.exports = GameXO;

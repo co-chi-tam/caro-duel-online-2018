@@ -262,6 +262,18 @@ public class CPlayer : CMonoSingleton<CPlayer> {
 		#endif
 	}
 
+	public void JoinExistedRoom()
+	{
+		if (this.m_Socket.IsConnected == false) {
+			this.m_Socket.Connect();
+		}
+		this.Emit("joinExistedRoom");
+		this.DisplayLoading (true);
+		#if UNITY_DEBUG
+		Debug.Log ("JoinExistedRoom");
+		#endif
+	}
+
 	/// <summary>
 	/// Emit to get room info.
 	/// </summary>

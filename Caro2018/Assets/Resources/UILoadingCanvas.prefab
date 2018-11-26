@@ -294,7 +294,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: Caro online
+  m_Text: LOADING ...
 --- !u!114 &114736703399022604
 MonoBehaviour:
   m_ObjectHideFlags: 1
